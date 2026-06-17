@@ -9,158 +9,187 @@ struct DashboardView: View {
         ScrollView {
             VStack(spacing: 16) {
 
-                // MARK: Header
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("TecStore Manager")
-                            .font(.title2).bold()
-                        Text("Panel de Control")
-                            .font(.caption).foregroundColor(.secondary)
-                    }
-                    Spacer()
-                    Image(systemName: "storefront.fill")
-                        .font(.title)
-                        .foregroundColor(.blue)
+                // MARK: Header gradient (card, no ignoresSafeArea)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Bienvenido 👋")
+                        .font(AppFonts.caption())
+                        .foregroundColor(.white.opacity(0.8))
+                    Text("TecStore Manager")
+                        .font(AppFonts.largeTitle())
+                        .foregroundColor(.white)
+                    Text("Panel de Control")
+                        .font(AppFonts.body())
+                        .foregroundColor(.white.opacity(0.7))
                 }
-                .padding(.horizontal)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(20)
+                .background(AppColors.gradientPrimary)
+                .cornerRadius(20)
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
 
-                // MARK: Tarjetas de estadísticas
+                // MARK: Stat cards
                 LazyVGrid(
                     columns: [GridItem(.flexible()), GridItem(.flexible())],
                     spacing: 12
                 ) {
-                    StatCard(title: "Productos", value: "\(viewModel.totalProductos)",
-                             icon: "cube.box.fill",  color: .blue)
-                    StatCard(title: "Clientes",  value: "\(viewModel.totalClientes)",
-                             icon: "person.2.fill", color: .green)
-                    StatCard(title: "Ventas",    value: "\(viewModel.totalVentas)",
-                             icon: "cart.fill",     color: .orange)
-                    StatCard(
+                    GradientStatCard(
+                        title: "Productos",
+                        value: "\(viewModel.totalProductos)",
+                        icon: "cube.box.fill",
+                        gradient: AppColors.gradientPrimary
+                    )
+                    GradientStatCard(
+                        title: "Clientes",
+                        value: "\(viewModel.totalClientes)",
+                        icon: "person.2.fill",
+                        gradient: AppColors.gradientSuccess
+                    )
+                    GradientStatCard(
+                        title: "Ventas",
+                        value: "\(viewModel.totalVentas)",
+                        icon: "cart.fill",
+                        gradient: AppColors.gradientWarning
+                    )
+                    GradientStatCard(
                         title: "Ingresos",
-                        value: "S/ \(viewModel.montoTotalVentas, default: "%.2f")",
+                        value: "S/ \(String(format: "%.0f", viewModel.montoTotalVentas))",
                         icon: "banknote.fill",
-                        color: .purple
+                        gradient: AppColors.gradientPurple
                     )
                 }
-                .padding(.horizontal)
+                .padding(.horizontal, 16)
 
-                // MARK: Resumen del día
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Hoy").font(.headline)
-                    HStack {
-                        VStack(spacing: 4) {
-                            Text("\(viewModel.ventasHoy)")
-                                .font(.title).bold().foregroundColor(.blue)
-                            Text("Ventas")
-                                .font(.caption).foregroundColor(.secondary)
-                        }
-                        .frame(maxWidth: .infinity)
-
-                        Divider().frame(height: 40)
-
-                        VStack(spacing: 4) {
-                            Text("S/ \(viewModel.montoHoy, specifier: "%.2f")")
-                                .font(.title3).bold().foregroundColor(.green)
-                            Text("Recaudado")
-                                .font(.caption).foregroundColor(.secondary)
-                        }
-                        .frame(maxWidth: .infinity)
+                // MARK: Resumen de hoy
+                VStack(alignment: .leading, spacing: 12) {
+                    SectionHeader(title: "Resumen de Hoy", icon: "sun.max.fill")
+                    HStack(spacing: 0) {
+                        TodayStat(
+                            value: "\(viewModel.ventasHoy)",
+                            label: "Ventas",
+                            color: AppColors.primary
+                        )
+                        Divider().frame(height: 50)
+                        TodayStat(
+                            value: "S/ \(String(format: "%.2f", viewModel.montoHoy))",
+                            label: "Recaudado",
+                            color: AppColors.success
+                        )
                     }
-                    .padding()
-                    .background(Color(.secondarySystemBackground))
-                    .cornerRadius(12)
+                    .background(AppColors.pageBackground)
+                    .cornerRadius(10)
                 }
-                .padding(.horizontal)
+                .cardStyle()
+                .padding(.horizontal, 16)
 
-                // MARK: Alertas de stock bajo
+                // MARK: Alertas stock bajo
                 if !viewModel.productosConBajoStock.isEmpty {
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundColor(.orange)
-                            Text("Stock Bajo").font(.headline)
-                            Spacer()
-                            Text("\(viewModel.productosConBajoStock.count)")
-                                .font(.caption)
-                                .padding(.horizontal, 8).padding(.vertical, 2)
-                                .background(Color.orange.opacity(0.2))
-                                .cornerRadius(8)
-                        }
+                    VStack(alignment: .leading, spacing: 12) {
+                        SectionHeader(
+                            title: "Stock Bajo",
+                            icon: "exclamationmark.triangle.fill",
+                            iconColor: AppColors.warning
+                        )
                         ForEach(viewModel.productosConBajoStock) { product in
                             HStack {
-                                Text(product.nombre).font(.subheadline)
+                                Text(product.nombre)
+                                    .font(AppFonts.body())
                                 Spacer()
-                                Text("\(product.stock) und.")
-                                    .font(.caption).bold()
-                                    .foregroundColor(.red)
+                                HStack(spacing: 4) {
+                                    Circle()
+                                        .fill(product.stock > 0 ? AppColors.warning : AppColors.danger)
+                                        .frame(width: 7, height: 7)
+                                    Text("\(product.stock) und.")
+                                        .font(AppFonts.caption())
+                                        .bold()
+                                        .foregroundColor(product.stock > 0 ? AppColors.warning : AppColors.danger)
+                                }
                             }
                             .padding(.vertical, 2)
                         }
                     }
-                    .padding()
-                    .background(Color(.secondarySystemBackground))
-                    .cornerRadius(12)
-                    .padding(.horizontal)
+                    .cardStyle()
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(AppColors.warning.opacity(0.4), lineWidth: 1)
+                    )
+                    .padding(.horizontal, 16)
                 }
 
                 // MARK: Ventas recientes
                 if !viewModel.ventasRecientes.isEmpty {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Ventas Recientes").font(.headline)
+                    VStack(alignment: .leading, spacing: 12) {
+                        SectionHeader(title: "Ventas Recientes", icon: "clock.fill")
                         ForEach(viewModel.ventasRecientes) { sale in
                             HStack {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text("Venta #\(sale.id.uuidString.prefix(8))")
-                                        .font(.subheadline)
+                                        .font(AppFonts.headline())
                                     Text(sale.fecha, style: .date)
-                                        .font(.caption).foregroundColor(.secondary)
+                                        .font(AppFonts.caption())
+                                        .foregroundColor(AppColors.textSecondary)
                                 }
                                 Spacer()
-                                Text("S/ \(sale.total, specifier: "%.2f")")
-                                    .bold().foregroundColor(.blue)
+                                Text("S/ \(String(format: "%.2f", sale.total))")
+                                    .font(AppFonts.headline())
+                                    .foregroundColor(AppColors.primary)
                             }
-                            .padding(.vertical, 2)
+                            .padding(.vertical, 4)
                             Divider()
                         }
                     }
-                    .padding()
-                    .background(Color(.secondarySystemBackground))
-                    .cornerRadius(12)
-                    .padding(.horizontal)
+                    .cardStyle()
+                    .padding(.horizontal, 16)
                 }
             }
-            .padding(.vertical)
+            .padding(.bottom, 20)
         }
+        .background(AppColors.pageBackground)
         .navigationTitle("Inicio")
+        .navigationBarTitleDisplayMode(.large)
         .onAppear { viewModel.loadDashboard() }
     }
 }
 
-// MARK: - StatCard
+// MARK: - SectionHeader
 
-struct StatCard: View {
+struct SectionHeader: View {
     let title: String
-    let value: String
     let icon: String
+    var iconColor: Color = AppColors.primary
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .foregroundColor(iconColor)
+                .font(.system(size: 14, weight: .semibold))
+            Text(title)
+                .font(AppFonts.headline())
+                .foregroundColor(AppColors.textPrimary)
+        }
+    }
+}
+
+// MARK: - TodayStat
+
+struct TodayStat: View {
+    let value: String
+    let label: String
     let color: Color
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Image(systemName: icon)
-                    .foregroundColor(color)
-                    .font(.title3)
-                Spacer()
-            }
+        VStack(spacing: 4) {
             Text(value)
-                .font(.title3).bold()
+                .font(AppFonts.title2())
+                .bold()
+                .foregroundColor(color)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
-            Text(title)
-                .font(.caption).foregroundColor(.secondary)
+            Text(label)
+                .font(AppFonts.caption())
+                .foregroundColor(AppColors.textSecondary)
         }
-        .padding()
-        .background(Color(.secondarySystemBackground))
-        .cornerRadius(12)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 12)
     }
 }

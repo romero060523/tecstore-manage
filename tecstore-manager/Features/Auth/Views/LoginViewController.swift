@@ -1,6 +1,7 @@
 // Pantalla de inicio de sesión 100% programática: solo bindings y UI, cero lógica de negocio.
 import Combine
 import UIKit
+import SwiftUI
 
 final class LoginViewController: UIViewController {
 
@@ -11,14 +12,16 @@ final class LoginViewController: UIViewController {
     var onLoginSuccess: (() -> Void)?
 
     private var centerYConstraint: NSLayoutConstraint?
+    private var bgGradientLayer: CAGradientLayer?
+    private var buttonGradientLayer: CAGradientLayer?
 
     // MARK: - UI Elements
 
     private let logoImageView: UIImageView = {
         let iv = UIImageView()
-        let config = UIImage.SymbolConfiguration(pointSize: 50, weight: .medium)
+        let config = UIImage.SymbolConfiguration(pointSize: 52, weight: .medium)
         iv.image = UIImage(systemName: "storefront.fill", withConfiguration: config)
-        iv.tintColor = AppColors.primary
+        iv.tintColor = UIColor(AppColors.primary)
         iv.contentMode = .scaleAspectFit
         iv.translatesAutoresizingMaskIntoConstraints = false
         return iv
@@ -27,8 +30,17 @@ final class LoginViewController: UIViewController {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "TecStore Manager"
-        label.font = AppFonts.title()
-        label.textColor = AppColors.textPrimary
+        label.font = .systemFont(ofSize: 26, weight: .bold)
+        label.textColor = UIColor(AppColors.textPrimary)
+        label.textAlignment = .center
+        return label
+    }()
+
+    private let subtitleLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Inicia sesión para continuar"
+        label.font = .systemFont(ofSize: 14, weight: .regular)
+        label.textColor = UIColor(AppColors.textSecondary)
         label.textAlignment = .center
         return label
     }()
@@ -37,12 +49,12 @@ final class LoginViewController: UIViewController {
     private let passwordTextField = UITextField()
 
     private let loginButton: UIButton = {
-        let button = UIButton(type: .system)
+        let button = UIButton(type: .custom)
         button.setTitle("INICIAR SESIÓN", for: .normal)
         button.setTitleColor(.white, for: .normal)
-        button.titleLabel?.font = AppFonts.body()
-        button.backgroundColor = AppColors.primary
-        button.layer.cornerRadius = 12
+        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
+        button.layer.cornerRadius = 14
+        button.layer.masksToBounds = true
         button.isEnabled = false
         button.alpha = 0.5
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -51,8 +63,8 @@ final class LoginViewController: UIViewController {
 
     private let errorLabel: UILabel = {
         let label = UILabel()
-        label.textColor = AppColors.error
-        label.font = AppFonts.caption()
+        label.textColor = UIColor(AppColors.danger)
+        label.font = .systemFont(ofSize: 12, weight: .medium)
         label.numberOfLines = 0
         label.textAlignment = .center
         label.isHidden = true
@@ -70,8 +82,8 @@ final class LoginViewController: UIViewController {
     private let versionLabel: UILabel = {
         let label = UILabel()
         label.text = "v\(AppConstants.appVersion) — TECSUP 2026"
-        label.font = AppFonts.caption()
-        label.textColor = AppColors.textSecondary
+        label.font = .systemFont(ofSize: 11, weight: .light)
+        label.textColor = UIColor(AppColors.textTertiary)
         label.textAlignment = .center
         return label
     }()
@@ -92,9 +104,74 @@ final class LoginViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = AppColors.background
+        setupBackground()
+        setupDecorativeElements()
         setupUI()
         bindViewModel()
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        bgGradientLayer?.frame = view.bounds
+        buttonGradientLayer?.frame = loginButton.bounds
+    }
+
+    // MARK: - Background
+
+    private func setupBackground() {
+        let gradient = CAGradientLayer()
+        gradient.colors = [
+            UIColor(red: 0.94, green: 0.96, blue: 1.00, alpha: 1).cgColor,
+            UIColor.systemBackground.cgColor
+        ]
+        gradient.startPoint = CGPoint(x: 0, y: 0)
+        gradient.endPoint   = CGPoint(x: 1, y: 1)
+        gradient.frame      = view.bounds
+        view.layer.insertSublayer(gradient, at: 0)
+        bgGradientLayer = gradient
+    }
+
+    private func setupDecorativeElements() {
+        // Large decorative circle (top-right)
+        let circleView = UIView()
+        circleView.backgroundColor = UIColor(AppColors.primary).withAlphaComponent(0.06)
+        circleView.layer.cornerRadius = 160
+        circleView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(circleView)
+        NSLayoutConstraint.activate([
+            circleView.widthAnchor.constraint(equalToConstant: 320),
+            circleView.heightAnchor.constraint(equalToConstant: 320),
+            circleView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 100),
+            circleView.topAnchor.constraint(equalTo: view.topAnchor, constant: -80)
+        ])
+
+        // Small decorative circle (bottom-left)
+        let circleSmall = UIView()
+        circleSmall.backgroundColor = UIColor(AppColors.purple).withAlphaComponent(0.06)
+        circleSmall.layer.cornerRadius = 100
+        circleSmall.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(circleSmall)
+        NSLayoutConstraint.activate([
+            circleSmall.widthAnchor.constraint(equalToConstant: 200),
+            circleSmall.heightAnchor.constraint(equalToConstant: 200),
+            circleSmall.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: -60),
+            circleSmall.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 40)
+        ])
+
+        // Blur effect for depth
+        let blurEffect = UIBlurEffect(style: .systemThinMaterial)
+        let blurView = UIVisualEffectView(effect: blurEffect)
+        blurView.alpha = 0.4
+        blurView.layer.cornerRadius = 120
+        blurView.clipsToBounds = true
+        blurView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(blurView)
+        NSLayoutConstraint.activate([
+            blurView.widthAnchor.constraint(equalToConstant: 240),
+            blurView.heightAnchor.constraint(equalToConstant: 240),
+            blurView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 80),
+            blurView.topAnchor.constraint(equalTo: view.topAnchor, constant: -60)
+        ])
     }
 
     // MARK: - Setup
@@ -117,6 +194,17 @@ final class LoginViewController: UIViewController {
         usernameTextField.delegate = self
         passwordTextField.delegate = self
 
+        // Gradient button background
+        let btnGradient = CAGradientLayer()
+        btnGradient.colors = [
+            UIColor(AppColors.primary).cgColor,
+            UIColor(AppColors.purple).cgColor
+        ]
+        btnGradient.startPoint = CGPoint(x: 0, y: 0)
+        btnGradient.endPoint   = CGPoint(x: 1, y: 1)
+        loginButton.layer.insertSublayer(btnGradient, at: 0)
+        buttonGradientLayer = btnGradient
+
         loginButton.addTarget(self, action: #selector(loginTapped), for: .touchUpInside)
 
         // Activity indicator inside button
@@ -125,38 +213,64 @@ final class LoginViewController: UIViewController {
             activityIndicator.centerXAnchor.constraint(equalTo: loginButton.centerXAnchor),
             activityIndicator.centerYAnchor.constraint(equalTo: loginButton.centerYAnchor),
 
-            // Fixed heights
-            usernameTextField.heightAnchor.constraint(equalToConstant: 50),
-            passwordTextField.heightAnchor.constraint(equalToConstant: 50),
-            loginButton.heightAnchor.constraint(equalToConstant: 50),
+            usernameTextField.heightAnchor.constraint(equalToConstant: 54),
+            passwordTextField.heightAnchor.constraint(equalToConstant: 54),
+            loginButton.heightAnchor.constraint(equalToConstant: 54),
             logoImageView.heightAnchor.constraint(equalToConstant: 80)
         ])
 
-        // Build stack
-        let stackView = UIStackView(arrangedSubviews: [
-            logoImageView,
-            titleLabel,
-            makeSpacer(height: 20),
+        // Card container
+        let cardView = UIView()
+        cardView.backgroundColor = UIColor.systemBackground.withAlphaComponent(0.85)
+        cardView.layer.cornerRadius = 24
+        cardView.layer.shadowColor  = UIColor.black.cgColor
+        cardView.layer.shadowOpacity = 0.08
+        cardView.layer.shadowOffset  = CGSize(width: 0, height: 8)
+        cardView.layer.shadowRadius  = 20
+        cardView.translatesAutoresizingMaskIntoConstraints = false
+
+        let innerStack = UIStackView(arrangedSubviews: [
             usernameTextField,
             passwordTextField,
             loginButton,
-            errorLabel,
+            errorLabel
+        ])
+        innerStack.axis      = .vertical
+        innerStack.spacing   = 16
+        innerStack.alignment = .fill
+        innerStack.translatesAutoresizingMaskIntoConstraints = false
+
+        cardView.addSubview(innerStack)
+        NSLayoutConstraint.activate([
+            innerStack.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 24),
+            innerStack.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -24),
+            innerStack.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 24),
+            innerStack.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -24)
+        ])
+
+        // Main stack
+        let stackView = UIStackView(arrangedSubviews: [
+            logoImageView,
+            titleLabel,
+            subtitleLabel,
+            makeSpacer(height: 8),
+            cardView,
             makeFlexibleSpacer(),
             versionLabel
         ])
-        stackView.axis = .vertical
-        stackView.spacing = 20
+        stackView.axis      = .vertical
+        stackView.spacing   = 12
         stackView.alignment = .fill
         stackView.translatesAutoresizingMaskIntoConstraints = false
 
         view.addSubview(stackView)
 
         centerYConstraint = stackView.centerYAnchor.constraint(
-            equalTo: view.centerYAnchor, constant: -50
+            equalTo: view.centerYAnchor, constant: -40
         )
         NSLayoutConstraint.activate([
-            stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 40),
-            stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40),
+            stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 32),
+            stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -32),
             stackView.topAnchor.constraint(
                 greaterThanOrEqualTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
             stackView.bottomAnchor.constraint(
@@ -164,11 +278,9 @@ final class LoginViewController: UIViewController {
             centerYConstraint!
         ])
 
-        // Dismiss keyboard on tap
         let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         view.addGestureRecognizer(tap)
 
-        // Keyboard notifications
         NotificationCenter.default.addObserver(
             self, selector: #selector(keyboardWillShow(_:)),
             name: UIResponder.keyboardWillShowNotification, object: nil)
@@ -180,7 +292,6 @@ final class LoginViewController: UIViewController {
     // MARK: - ViewModel Bindings
 
     private func bindViewModel() {
-        // TextField → ViewModel
         NotificationCenter.default
             .publisher(for: UITextField.textDidChangeNotification, object: usernameTextField)
             .map { ($0.object as? UITextField)?.text ?? "" }
@@ -193,7 +304,6 @@ final class LoginViewController: UIViewController {
             .assign(to: \.password, on: viewModel)
             .store(in: &cancellables)
 
-        // isLoginEnabled → button appearance
         viewModel.$isLoginEnabled
             .receive(on: DispatchQueue.main)
             .sink { [weak self] enabled in
@@ -204,7 +314,6 @@ final class LoginViewController: UIViewController {
             }
             .store(in: &cancellables)
 
-        // errorMessage → error label
         viewModel.$errorMessage
             .receive(on: DispatchQueue.main)
             .sink { [weak self] message in
@@ -215,7 +324,6 @@ final class LoginViewController: UIViewController {
             }
             .store(in: &cancellables)
 
-        // isLoading → activity indicator + button title
         viewModel.$isLoading
             .receive(on: DispatchQueue.main)
             .sink { [weak self] loading in
@@ -232,7 +340,6 @@ final class LoginViewController: UIViewController {
             }
             .store(in: &cancellables)
 
-        // Propagate login success up to coordinator
         viewModel.onLoginSuccess = { [weak self] in
             self?.onLoginSuccess?()
         }
@@ -270,7 +377,7 @@ final class LoginViewController: UIViewController {
         else { return }
 
         UIView.animate(withDuration: duration) {
-            self.centerYConstraint?.constant = -50
+            self.centerYConstraint?.constant = -40
             self.view.layoutIfNeeded()
         }
     }
@@ -284,29 +391,31 @@ final class LoginViewController: UIViewController {
         isSecure: Bool = false,
         returnKey: UIReturnKeyType = .default
     ) {
-        textField.placeholder = placeholder
-        textField.isSecureTextEntry = isSecure
+        textField.placeholder         = placeholder
+        textField.isSecureTextEntry   = isSecure
         textField.autocapitalizationType = .none
-        textField.autocorrectionType = .no
-        textField.returnKeyType = returnKey
-        textField.backgroundColor = AppColors.secondaryBackground
-        textField.layer.cornerRadius = 10
-        textField.layer.masksToBounds = true
+        textField.autocorrectionType  = .no
+        textField.returnKeyType       = returnKey
+        textField.backgroundColor     = UIColor.systemGray6
+        textField.layer.cornerRadius  = 14
+        textField.layer.masksToBounds = false
+        textField.layer.shadowColor   = UIColor.black.cgColor
+        textField.layer.shadowOpacity = 0.04
+        textField.layer.shadowOffset  = CGSize(width: 0, height: 2)
+        textField.layer.shadowRadius  = 4
         textField.translatesAutoresizingMaskIntoConstraints = false
 
-        // Left icon
-        let iconContainer = UIView(frame: CGRect(x: 0, y: 0, width: 44, height: 50))
-        let iconView = UIImageView(image: UIImage(systemName: iconName))
-        iconView.tintColor = .secondaryLabel
-        iconView.contentMode = .scaleAspectFit
-        iconView.frame = CGRect(x: 10, y: 13, width: 22, height: 24)
+        let iconContainer = UIView(frame: CGRect(x: 0, y: 0, width: 46, height: 54))
+        let iconView      = UIImageView(image: UIImage(systemName: iconName))
+        iconView.tintColor     = UIColor(AppColors.textSecondary)
+        iconView.contentMode   = .scaleAspectFit
+        iconView.frame         = CGRect(x: 12, y: 15, width: 22, height: 24)
         iconContainer.addSubview(iconView)
-        textField.leftView = iconContainer
+        textField.leftView     = iconContainer
         textField.leftViewMode = .always
 
-        // Right padding
-        let rightPad = UIView(frame: CGRect(x: 0, y: 0, width: 12, height: 50))
-        textField.rightView = rightPad
+        let rightPad = UIView(frame: CGRect(x: 0, y: 0, width: 14, height: 54))
+        textField.rightView     = rightPad
         textField.rightViewMode = .always
     }
 

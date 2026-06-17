@@ -1,9 +1,12 @@
-// Escala tipográfica de la aplicación.
-import UIKit
+import SwiftUI
 
 struct AppFonts {
-    static func title()   -> UIFont { .systemFont(ofSize: 28, weight: .bold) }
-    static func heading() -> UIFont { .systemFont(ofSize: 20, weight: .semibold) }
-    static func body()    -> UIFont { .systemFont(ofSize: 16, weight: .regular) }
-    static func caption() -> UIFont { .systemFont(ofSize: 12, weight: .light) }
+    static func largeTitle() -> Font { .system(size: 32, weight: .bold,    design: .rounded) }
+    static func title()      -> Font { .system(size: 24, weight: .bold,    design: .rounded) }
+    static func title2()     -> Font { .system(size: 20, weight: .semibold, design: .rounded) }
+    static func headline()   -> Font { .system(size: 16, weight: .semibold, design: .rounded) }
+    static func body()       -> Font { .system(size: 15, weight: .regular,  design: .default) }
+    static func caption()    -> Font { .system(size: 12, weight: .medium,   design: .rounded) }
+    static func caption2()   -> Font { .system(size: 11, weight: .regular,  design: .rounded) }
+    static func mono()       -> Font { .system(size: 13, weight: .medium,   design: .monospaced) }
 }

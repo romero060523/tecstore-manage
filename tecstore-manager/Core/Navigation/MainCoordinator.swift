@@ -201,7 +201,7 @@ final class MainCoordinator: Coordinator {
         viewModel.onNavigateToAbout    = { [weak self] in self?.showAbout() }
         let vc = UIHostingController(rootView: SettingsView(viewModel: viewModel))
         vc.tabBarItem = UITabBarItem(
-            title: "Más",
+            title: "Configuración",
             image: UIImage(systemName: "ellipsis.circle.fill"),
             tag: 5
         )

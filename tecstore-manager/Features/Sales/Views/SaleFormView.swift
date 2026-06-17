@@ -7,24 +7,27 @@ struct SaleFormView: View {
 
     var body: some View {
         Form {
+
             // MARK: Cliente
-            Section("Cliente") {
+            Section {
                 TextField("Buscar cliente...", text: $viewModel.clientSearchText)
+                    .font(AppFonts.body())
                     .autocorrectionDisabled()
 
                 if let client = viewModel.selectedClient {
-                    HStack {
+                    HStack(spacing: 10) {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.green)
+                            .foregroundColor(AppColors.success)
+                            .font(.system(size: 18))
                         Text("\(client.nombres) \(client.apellidos)")
-                            .bold()
+                            .font(AppFonts.headline())
                         Spacer()
                         Button("Cambiar") {
-                            viewModel.selectedClient    = nil
-                            viewModel.clientSearchText  = ""
+                            viewModel.selectedClient   = nil
+                            viewModel.clientSearchText = ""
                         }
-                        .font(.caption)
-                        .foregroundColor(.blue)
+                        .font(AppFonts.caption())
+                        .foregroundColor(AppColors.primary)
                     }
                 } else {
                     ForEach(filteredClients) { client in
@@ -33,41 +36,52 @@ struct SaleFormView: View {
                             viewModel.clientSearchText = ""
                         } label: {
                             HStack {
-                                Text("\(client.nombres) \(client.apellidos)")
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("\(client.nombres) \(client.apellidos)")
+                                        .font(AppFonts.body())
+                                        .foregroundColor(AppColors.textPrimary)
+                                    Text("DNI: \(client.dni)")
+                                        .font(AppFonts.caption())
+                                        .foregroundColor(AppColors.textSecondary)
+                                }
                                 Spacer()
-                                Text("DNI: \(client.dni)")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundColor(AppColors.textTertiary)
                             }
                         }
-                        .foregroundColor(.primary)
                     }
                 }
+            } header: {
+                Label("Cliente", systemImage: "person.fill")
+                    .foregroundColor(AppColors.primary)
             }
 
             // MARK: Producto
-            Section("Producto") {
+            Section {
                 TextField("Buscar producto...", text: $viewModel.productSearchText)
+                    .font(AppFonts.body())
                     .autocorrectionDisabled()
 
                 if let product = viewModel.selectedProduct {
-                    HStack {
+                    HStack(spacing: 10) {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.green)
+                            .foregroundColor(AppColors.success)
+                            .font(.system(size: 18))
                         VStack(alignment: .leading, spacing: 2) {
                             Text(product.nombre)
-                                .bold()
-                            Text("S/ \(viewModel.precioUnitario, specifier: "%.2f") — Stock: \(viewModel.stockDisponible)")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                                .font(AppFonts.headline())
+                            Text("S/ \(String(format: "%.2f", viewModel.precioUnitario))  ·  Stock: \(viewModel.stockDisponible)")
+                                .font(AppFonts.caption())
+                                .foregroundColor(AppColors.textSecondary)
                         }
                         Spacer()
                         Button("Cambiar") {
                             viewModel.selectedProduct   = nil
                             viewModel.productSearchText = ""
                         }
-                        .font(.caption)
-                        .foregroundColor(.blue)
+                        .font(AppFonts.caption())
+                        .foregroundColor(AppColors.primary)
                     }
                 } else {
                     ForEach(filteredProducts) { product in
@@ -78,61 +92,81 @@ struct SaleFormView: View {
                             HStack {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(product.nombre)
-                                    Text("S/ \(product.precio, specifier: "%.2f")")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
+                                        .font(AppFonts.body())
+                                        .foregroundColor(AppColors.textPrimary)
+                                    Text("S/ \(String(format: "%.2f", product.precio))")
+                                        .font(AppFonts.caption())
+                                        .foregroundColor(AppColors.textSecondary)
                                 }
                                 Spacer()
-                                Text("Stock: \(product.stock)")
-                                    .font(.caption)
-                                    .foregroundColor(product.stock > 5 ? .green : .orange)
+                                HStack(spacing: 4) {
+                                    Circle()
+                                        .fill(product.stock > 5 ? AppColors.success : AppColors.warning)
+                                        .frame(width: 6, height: 6)
+                                    Text("Stock: \(product.stock)")
+                                        .font(AppFonts.caption())
+                                        .foregroundColor(product.stock > 5 ? AppColors.success : AppColors.warning)
+                                }
                             }
                         }
-                        .foregroundColor(.primary)
                     }
                 }
+            } header: {
+                Label("Producto", systemImage: "cube.box.fill")
+                    .foregroundColor(AppColors.primary)
             }
 
             // MARK: Cantidad
-            Section("Cantidad") {
+            Section {
                 HStack {
                     Text("Unidades")
+                        .font(AppFonts.body())
                     Spacer()
                     TextField("1", text: $viewModel.cantidad)
                         .keyboardType(.numberPad)
                         .multilineTextAlignment(.trailing)
                         .frame(maxWidth: 80)
+                        .font(AppFonts.headline())
+                        .foregroundColor(AppColors.primary)
                 }
                 if viewModel.selectedProduct != nil {
                     Text("Disponible: \(viewModel.stockDisponible) unidades")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                        .font(AppFonts.caption())
+                        .foregroundColor(AppColors.textSecondary)
                 }
+            } header: {
+                Label("Cantidad", systemImage: "number.circle.fill")
+                    .foregroundColor(AppColors.primary)
             }
 
             // MARK: Resumen
-            Section("Resumen") {
+            Section {
                 HStack {
                     Text("Subtotal")
+                        .font(AppFonts.body())
                     Spacer()
-                    Text("S/ \(viewModel.subtotal, specifier: "%.2f")")
-                        .foregroundColor(.secondary)
+                    Text("S/ \(String(format: "%.2f", viewModel.subtotal))")
+                        .foregroundColor(AppColors.textSecondary)
                 }
                 HStack {
                     Text("IGV (18%)")
+                        .font(AppFonts.body())
                     Spacer()
-                    Text("S/ \(viewModel.igv, specifier: "%.2f")")
-                        .foregroundColor(.secondary)
+                    Text("S/ \(String(format: "%.2f", viewModel.igv))")
+                        .foregroundColor(AppColors.textSecondary)
                 }
                 HStack {
                     Text("TOTAL")
-                        .bold()
+                        .font(AppFonts.headline())
+                        .foregroundColor(AppColors.textPrimary)
                     Spacer()
-                    Text("S/ \(viewModel.total, specifier: "%.2f")")
-                        .bold()
-                        .foregroundColor(.blue)
-                        .font(.title3)
+                    Text("S/ \(String(format: "%.2f", viewModel.total))")
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .foregroundColor(AppColors.primary)
                 }
+            } header: {
+                Label("Resumen", systemImage: "list.bullet.rectangle.fill")
+                    .foregroundColor(AppColors.primary)
             }
 
             // MARK: Error
@@ -140,22 +174,30 @@ struct SaleFormView: View {
                 Section {
                     HStack(spacing: 8) {
                         Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundColor(.red)
+                            .foregroundColor(AppColors.danger)
                         Text(error)
-                            .foregroundColor(.red)
-                            .font(.callout)
+                            .font(AppFonts.caption())
+                            .foregroundColor(AppColors.danger)
                     }
                 }
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(AppColors.pageBackground)
         .navigationTitle("Nueva Venta")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
         .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button("Cancelar", action: onCancel)
+                    .foregroundColor(AppColors.primary)
+            }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Registrar") {
                     viewModel.save()
                 }
                 .fontWeight(.bold)
+                .foregroundColor(viewModel.isFormValid ? AppColors.primary : AppColors.textTertiary)
                 .disabled(!viewModel.isFormValid)
             }
         }
@@ -164,7 +206,7 @@ struct SaleFormView: View {
         }
     }
 
-    // MARK: - Computed Filters
+    // MARK: - Computed filters
 
     private var filteredClients: [Cliente] {
         guard !viewModel.clientSearchText.isEmpty else { return viewModel.clients }

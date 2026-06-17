@@ -8,7 +8,7 @@ struct SaleListView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            SaleSummaryCard(viewModel: viewModel)
+            SaleSummaryHeader(viewModel: viewModel)
 
             Divider()
 
@@ -22,17 +22,24 @@ struct SaleListView: View {
                             productName: viewModel.getProductName(id: sale.productoId),
                             clientName:  viewModel.getClientName(id: sale.clienteId)
                         )
+                        .listRowBackground(AppColors.cardBackground)
+                        .listRowSeparatorTint(AppColors.textTertiary.opacity(0.3))
                     }
                 }
                 .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+                .background(AppColors.pageBackground)
             }
         }
+        .background(AppColors.pageBackground.ignoresSafeArea())
         .navigationTitle("Ventas")
+        .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: onCreate) {
                     Image(systemName: "plus")
                         .fontWeight(.semibold)
+                        .foregroundColor(AppColors.primary)
                 }
             }
         }
@@ -40,50 +47,75 @@ struct SaleListView: View {
     }
 }
 
-// MARK: - SaleSummaryCard
+// MARK: - SaleSummaryHeader
 
-private struct SaleSummaryCard: View {
+private struct SaleSummaryHeader: View {
     @ObservedObject var viewModel: SaleListViewModel
 
     var body: some View {
         VStack(spacing: 12) {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Total Ventas")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Text("\(viewModel.totalVentas)")
-                        .font(.title2)
-                        .bold()
-                }
-                Spacer()
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text("Monto Total")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Text("S/ \(viewModel.montoTotal, specifier: "%.2f")")
-                        .font(.title2)
-                        .bold()
-                        .foregroundColor(.blue)
-                }
-            }
 
-            Button {
-                withAnimation { viewModel.showDateFilter.toggle() }
-            } label: {
+            // Gradient summary card
+            ZStack(alignment: .bottomLeading) {
+                AppColors.gradientPrimary
+                    .cornerRadius(20)
                 HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Total Ventas")
+                            .font(AppFonts.caption())
+                            .foregroundColor(.white.opacity(0.8))
+                        Text("\(viewModel.totalVentas)")
+                            .font(AppFonts.largeTitle())
+                            .foregroundColor(.white)
+                    }
+                    Spacer()
+                    VStack(alignment: .trailing, spacing: 4) {
+                        Text("Monto Total")
+                            .font(AppFonts.caption())
+                            .foregroundColor(.white.opacity(0.8))
+                        Text("S/ \(String(format: "%.2f", viewModel.montoTotal))")
+                            .font(AppFonts.title2())
+                            .foregroundColor(.white)
+                            .bold()
+                    }
+                }
+                .padding(20)
+            }
+            .frame(height: 110)
+            .shadow(color: AppColors.primary.opacity(0.3), radius: 10, x: 0, y: 5)
+
+            // Date filter toggle
+            Button {
+                withAnimation(.easeInOut(duration: 0.25)) {
+                    viewModel.showDateFilter.toggle()
+                }
+            } label: {
+                HStack(spacing: 6) {
                     Image(systemName: "calendar")
-                    Text(viewModel.startDate != nil ? "Filtro activo" : "Filtrar por fecha")
+                        .font(.system(size: 13, weight: .semibold))
+                    Text(viewModel.startDate != nil ? "Filtro de fecha activo" : "Filtrar por fecha")
+                        .font(AppFonts.caption())
                     Spacer()
                     Image(systemName: "chevron.down")
+                        .font(.system(size: 11, weight: .semibold))
                         .rotationEffect(.degrees(viewModel.showDateFilter ? 180 : 0))
                 }
-                .font(.caption)
-                .foregroundColor(.blue)
+                .foregroundColor(viewModel.startDate != nil ? AppColors.primary : AppColors.textSecondary)
+                .padding(.horizontal, 14).padding(.vertical, 10)
+                .background(AppColors.cardBackground)
+                .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(viewModel.startDate != nil
+                                ? AppColors.primary.opacity(0.3)
+                                : AppColors.textTertiary.opacity(0.2),
+                                lineWidth: 1)
+                )
             }
+            .buttonStyle(.plain)
 
             if viewModel.showDateFilter {
-                VStack(spacing: 8) {
+                VStack(spacing: 10) {
                     DatePicker(
                         "Desde",
                         selection: Binding(
@@ -92,6 +124,7 @@ private struct SaleSummaryCard: View {
                         ),
                         displayedComponents: .date
                     )
+                    .tint(AppColors.primary)
                     DatePicker(
                         "Hasta",
                         selection: Binding(
@@ -100,18 +133,22 @@ private struct SaleSummaryCard: View {
                         ),
                         displayedComponents: .date
                     )
+                    .tint(AppColors.primary)
                     Button("Limpiar filtros") {
                         viewModel.startDate = nil
                         viewModel.endDate   = nil
                     }
-                    .font(.caption)
-                    .foregroundColor(.red)
+                    .font(AppFonts.caption())
+                    .foregroundColor(AppColors.danger)
                 }
-                .font(.caption)
+                .font(AppFonts.body())
+                .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
-        .padding()
-        .background(Color(.secondarySystemBackground))
+        .padding(.horizontal, 16)
+        .padding(.top, 12)
+        .padding(.bottom, 12)
+        .background(AppColors.pageBackground)
     }
 }
 
@@ -123,35 +160,50 @@ struct SaleRowView: View {
     let clientName: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(productName)
-                        .font(.headline)
-                        .lineLimit(1)
-                    Text(clientName)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-                }
-                Spacer()
-                Text("S/ \(sale.total, specifier: "%.2f")")
-                    .font(.headline)
-                    .foregroundColor(.blue)
+        HStack(spacing: 12) {
+
+            ZStack {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(AppColors.gradientWarning)
+                    .frame(width: 46, height: 46)
+                Image(systemName: "cart.fill")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.white)
             }
 
-            HStack {
-                Label("\(sale.cantidad) und.", systemImage: "number")
-                Spacer()
-                Label("IGV: S/ \(sale.igv, specifier: "%.2f")", systemImage: "percent")
-                Spacer()
-                Text(sale.fecha, style: .date)
-                    .font(.caption2)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(productName)
+                    .font(AppFonts.headline())
+                    .foregroundColor(AppColors.textPrimary)
+                    .lineLimit(1)
+                Text(clientName)
+                    .font(AppFonts.caption())
+                    .foregroundColor(AppColors.textSecondary)
+                    .lineLimit(1)
+                HStack(spacing: 8) {
+                    Label("\(sale.cantidad) und.", systemImage: "number")
+                    Text("·")
+                    Label("IGV S/ \(String(format: "%.2f", sale.igv))", systemImage: "percent")
+                }
+                .font(AppFonts.caption2())
+                .foregroundColor(AppColors.textTertiary)
             }
-            .font(.caption)
-            .foregroundColor(.secondary)
+
+            Spacer()
+
+            VStack(alignment: .trailing, spacing: 6) {
+                Text("S/ \(String(format: "%.2f", sale.total))")
+                    .font(AppFonts.headline())
+                    .foregroundColor(AppColors.primary)
+                    .padding(.horizontal, 8).padding(.vertical, 3)
+                    .background(AppColors.primary.opacity(0.08))
+                    .cornerRadius(8)
+                Text(sale.fecha, style: .date)
+                    .font(AppFonts.caption2())
+                    .foregroundColor(AppColors.textTertiary)
+            }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 6)
     }
 }
 
@@ -159,13 +211,24 @@ struct SaleRowView: View {
 
 private struct EmptySalesView: View {
     var body: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "cart")
-                .font(.system(size: 50))
-                .foregroundColor(.gray)
+        VStack(spacing: 20) {
+            ZStack {
+                Circle()
+                    .fill(AppColors.warning.opacity(0.07))
+                    .frame(width: 120, height: 120)
+                Circle()
+                    .fill(AppColors.warning.opacity(0.10))
+                    .frame(width: 90, height: 90)
+                Image(systemName: "cart")
+                    .font(.system(size: 44))
+                    .foregroundColor(AppColors.warning.opacity(0.6))
+            }
             Text("No hay ventas registradas")
-                .font(.headline)
-                .foregroundColor(.secondary)
+                .font(AppFonts.headline())
+                .foregroundColor(AppColors.textSecondary)
+            Text("Toca + para registrar la primera venta")
+                .font(AppFonts.caption())
+                .foregroundColor(AppColors.textTertiary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding()

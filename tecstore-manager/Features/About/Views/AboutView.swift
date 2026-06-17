@@ -4,68 +4,107 @@ struct AboutView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 24) {
-                Spacer().frame(height: 20)
+            VStack(spacing: 0) {
 
-                // Logo
-                Image(systemName: "storefront.fill")
-                    .font(.system(size: 60))
-                    .foregroundColor(.blue)
-
-                Text("TecStore Manager")
-                    .font(.title).bold()
-
-                Text("v1.0")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-
-                Text("Sistema de gestión de inventarios, clientes y ventas para tiendas retail.")
-                    .multilineTextAlignment(.center)
-                    .foregroundColor(.secondary)
-                    .padding(.horizontal, 32)
-
-                Divider().padding(.horizontal, 40)
-
-                // Info del proyecto
-                VStack(spacing: 12) {
-                    InfoRow(label: "Desarrollador", value: "Andy")
-                    InfoRow(label: "Institución",   value: "TECSUP")
-                    InfoRow(label: "Programa",      value: "Diseño y Desarrollo de Software")
-                    InfoRow(label: "Ciclo",         value: "V")
-                    InfoRow(label: "Año",           value: "2026")
-                }
-                .padding()
-                .background(Color(.secondarySystemBackground))
-                .cornerRadius(12)
-                .padding(.horizontal)
-
-                Divider().padding(.horizontal, 40)
-
-                // Tecnologías
-                VStack(spacing: 10) {
-                    Text("Tecnologías").font(.headline)
-                    HStack(spacing: 12) {
-                        TechBadge(name: "UIKit")
-                        TechBadge(name: "SwiftUI")
-                        TechBadge(name: "Core Data")
+                // MARK: Gradient header
+                ZStack {
+                    AppColors.gradientPrimary
+                    VStack(spacing: 10) {
+                        Image(systemName: "storefront.fill")
+                            .font(.system(size: 50, weight: .medium))
+                            .foregroundColor(.white)
+                        Text("TecStore Manager")
+                            .font(AppFonts.largeTitle())
+                            .foregroundColor(.white)
+                        Text("v1.0")
+                            .font(AppFonts.caption())
+                            .foregroundColor(.white.opacity(0.8))
+                            .padding(.horizontal, 14).padding(.vertical, 5)
+                            .background(Color.white.opacity(0.2))
+                            .cornerRadius(10)
                     }
-                    HStack(spacing: 12) {
-                        TechBadge(name: "MapKit")
-                        TechBadge(name: "Combine")
-                        TechBadge(name: "MVVM")
-                    }
+                    .padding(.top, 24)
                 }
+                .frame(height: 220)
 
-                Spacer().frame(height: 8)
+                VStack(spacing: 20) {
 
-                Text("© 2026 TECSUP — Todos los derechos reservados")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
+                    // MARK: Descripción
+                    Text("Sistema de gestión de inventarios, clientes y ventas para tiendas retail.")
+                        .font(AppFonts.body())
+                        .foregroundColor(AppColors.textSecondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                        .padding(.top, 8)
 
-                Spacer().frame(height: 20)
+                    // MARK: Info del proyecto
+                    VStack(spacing: 0) {
+                        InfoRow(
+                            label: "Desarrollador",
+                            value: "Andy",
+                            icon: "person.fill",
+                            color: AppColors.primary
+                        )
+                        Divider().padding(.leading, 44)
+                        InfoRow(
+                            label: "Institución",
+                            value: "TECSUP",
+                            icon: "building.columns.fill",
+                            color: AppColors.success
+                        )
+                        Divider().padding(.leading, 44)
+                        InfoRow(
+                            label: "Programa",
+                            value: "DDS",
+                            icon: "laptopcomputer",
+                            color: AppColors.warning
+                        )
+                        Divider().padding(.leading, 44)
+                        InfoRow(
+                            label: "Ciclo",
+                            value: "V",
+                            icon: "graduationcap.fill",
+                            color: AppColors.purple
+                        )
+                        Divider().padding(.leading, 44)
+                        InfoRow(
+                            label: "Año",
+                            value: "2026",
+                            icon: "calendar",
+                            color: AppColors.primary
+                        )
+                    }
+                    .cardStyle(padding: 0)
+
+                    // MARK: Tecnologías
+                    VStack(spacing: 14) {
+                        SectionHeader(title: "Tecnologías", icon: "wrench.and.screwdriver.fill")
+                        HStack(spacing: 10) {
+                            TechBadge(name: "UIKit",      gradient: AppColors.gradientPrimary)
+                            TechBadge(name: "SwiftUI",    gradient: AppColors.gradientSuccess)
+                            TechBadge(name: "Core Data",  gradient: AppColors.gradientWarning)
+                        }
+                        HStack(spacing: 10) {
+                            TechBadge(name: "MapKit",     gradient: AppColors.gradientPurple)
+                            TechBadge(name: "Combine",    gradient: AppColors.gradientPrimary)
+                            TechBadge(name: "MVVM",       gradient: AppColors.gradientSuccess)
+                        }
+                    }
+                    .cardStyle()
+
+                    Text("© 2026 TECSUP — Todos los derechos reservados")
+                        .font(AppFonts.caption2())
+                        .foregroundColor(AppColors.textTertiary)
+                        .padding(.bottom, 8)
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 20)
+                .padding(.bottom, 24)
             }
         }
+        .background(AppColors.pageBackground.ignoresSafeArea())
         .navigationTitle("Acerca de")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
@@ -74,13 +113,29 @@ struct AboutView: View {
 struct InfoRow: View {
     let label: String
     let value: String
+    let icon: String
+    let color: Color
 
     var body: some View {
-        HStack {
-            Text(label).foregroundColor(.secondary)
+        HStack(spacing: 12) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(color.opacity(0.12))
+                    .frame(width: 32, height: 32)
+                Image(systemName: icon)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(color)
+            }
+            Text(label)
+                .font(AppFonts.body())
+                .foregroundColor(AppColors.textSecondary)
             Spacer()
-            Text(value).bold()
+            Text(value)
+                .font(AppFonts.headline())
+                .foregroundColor(AppColors.textPrimary)
         }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
     }
 }
 
@@ -88,14 +143,16 @@ struct InfoRow: View {
 
 struct TechBadge: View {
     let name: String
+    let gradient: LinearGradient
 
     var body: some View {
         Text(name)
-            .font(.caption)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(Color.blue.opacity(0.1))
-            .foregroundColor(.blue)
-            .cornerRadius(16)
+            .font(AppFonts.caption())
+            .foregroundColor(.white)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(gradient)
+            .cornerRadius(20)
+            .shadow(color: Color.black.opacity(0.10), radius: 4, x: 0, y: 2)
     }
 }

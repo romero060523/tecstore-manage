@@ -9,12 +9,36 @@ struct ClientListView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ClientSearchBar(text: $viewModel.searchText)
+
+            // MARK: Search bar
+            HStack(spacing: 10) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(AppColors.textSecondary)
+                TextField("Buscar por nombre o DNI...", text: $viewModel.searchText)
+                    .font(AppFonts.body())
+                    .autocorrectionDisabled()
+                if !viewModel.searchText.isEmpty {
+                    Button {
+                        viewModel.searchText = ""
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(AppColors.textTertiary)
+                    }
+                }
+            }
+            .padding(.horizontal, 14).padding(.vertical, 11)
+            .background(AppColors.cardBackground)
+            .cornerRadius(14)
+            .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+            .padding(.horizontal, 16)
+            .padding(.top, 12)
+            .padding(.bottom, 8)
 
             Divider()
 
             if viewModel.isLoading {
                 ProgressView()
+                    .tint(AppColors.primary)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if viewModel.clients.isEmpty {
                 EmptyClientsView(searchText: viewModel.searchText)
@@ -24,6 +48,8 @@ struct ClientListView: View {
                         ClientRowView(client: client)
                             .contentShape(Rectangle())
                             .onTapGesture { onEdit(client) }
+                            .listRowBackground(AppColors.cardBackground)
+                            .listRowSeparatorTint(AppColors.textTertiary.opacity(0.3))
                             .swipeActions(edge: .trailing) {
                                 Button(role: .destructive) {
                                     viewModel.deleteClient(id: client.id)
@@ -34,14 +60,19 @@ struct ClientListView: View {
                     }
                 }
                 .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+                .background(AppColors.pageBackground)
             }
         }
+        .background(AppColors.pageBackground.ignoresSafeArea())
         .navigationTitle("Clientes")
+        .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: onAdd) {
                     Image(systemName: "plus")
                         .fontWeight(.semibold)
+                        .foregroundColor(AppColors.primary)
                 }
             }
         }
@@ -56,71 +87,54 @@ struct ClientRowView: View {
 
     var body: some View {
         HStack(spacing: 12) {
+
+            // Gradient avatar
             ZStack {
                 Circle()
-                    .fill(Color.blue.opacity(0.15))
-                    .frame(width: 44, height: 44)
-                Text(
-                    String(client.nombres.prefix(1)) +
-                    String(client.apellidos.prefix(1))
-                )
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.blue)
+                    .fill(AppColors.gradientPrimary)
+                    .frame(width: 48, height: 48)
+                Text(initials(client))
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
             }
 
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text("\(client.nombres) \(client.apellidos)")
-                    .font(.headline)
+                    .font(AppFonts.headline())
+                    .foregroundColor(AppColors.textPrimary)
                     .lineLimit(1)
                 Text("DNI: \(client.dni)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    .font(AppFonts.caption())
+                    .foregroundColor(AppColors.textSecondary)
                 if let telefono = client.telefono, !telefono.isEmpty {
                     HStack(spacing: 4) {
                         Image(systemName: "phone.fill")
-                            .font(.caption2)
+                            .font(.system(size: 9))
                         Text(telefono)
-                            .font(.caption)
+                            .font(AppFonts.caption2())
                     }
-                    .foregroundColor(.secondary)
+                    .foregroundColor(AppColors.textTertiary)
                 }
             }
 
             Spacer()
 
-            Circle()
-                .fill(client.estado ? Color.green : Color.red)
-                .frame(width: 10, height: 10)
+            Text(client.estado ? "Activo" : "Inactivo")
+                .font(AppFonts.caption2())
+                .padding(.horizontal, 8).padding(.vertical, 3)
+                .background(client.estado
+                             ? AppColors.success.opacity(0.12)
+                             : AppColors.danger.opacity(0.12))
+                .foregroundColor(client.estado ? AppColors.success : AppColors.danger)
+                .cornerRadius(8)
         }
         .padding(.vertical, 4)
     }
-}
 
-// MARK: - ClientSearchBar
-
-private struct ClientSearchBar: View {
-    @Binding var text: String
-
-    var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "magnifyingglass")
-                .foregroundColor(.secondary)
-            TextField("Buscar por nombre o DNI...", text: $text)
-                .autocorrectionDisabled()
-            if !text.isEmpty {
-                Button {
-                    text = ""
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.secondary)
-                }
-            }
-        }
-        .padding(10)
-        .background(Color(.systemGray6))
-        .cornerRadius(10)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
+    private func initials(_ client: Cliente) -> String {
+        let n = client.nombres.first.map(String.init) ?? ""
+        let a = client.apellidos.first.map(String.init) ?? ""
+        return (n + a).uppercased()
     }
 }
 
@@ -130,21 +144,28 @@ private struct EmptyClientsView: View {
     let searchText: String
 
     var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "person.2")
-                .font(.system(size: 60))
-                .foregroundColor(.secondary)
-            Text(
-                searchText.isEmpty
-                    ? "No hay clientes"
-                    : "Sin resultados para \"\(searchText)\""
-            )
-            .font(.headline)
-            .foregroundColor(.secondary)
+        VStack(spacing: 20) {
+            ZStack {
+                Circle()
+                    .fill(AppColors.primary.opacity(0.05))
+                    .frame(width: 120, height: 120)
+                Circle()
+                    .fill(AppColors.primary.opacity(0.08))
+                    .frame(width: 90, height: 90)
+                Image(systemName: "person.2")
+                    .font(.system(size: 44))
+                    .foregroundColor(AppColors.primary.opacity(0.5))
+            }
+            Text(searchText.isEmpty
+                 ? "No hay clientes registrados"
+                 : "Sin resultados para «\(searchText)»")
+                .font(AppFonts.headline())
+                .foregroundColor(AppColors.textSecondary)
+                .multilineTextAlignment(.center)
             if searchText.isEmpty {
-                Text("Toca + para agregar uno")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                Text("Toca + para agregar el primer cliente")
+                    .font(AppFonts.caption())
+                    .foregroundColor(AppColors.textTertiary)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
