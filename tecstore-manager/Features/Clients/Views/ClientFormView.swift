@@ -1,4 +1,5 @@
 import SwiftUI
+import MapKit
 
 struct ClientFormView: View {
     @ObservedObject var viewModel: ClientFormViewModel
@@ -87,6 +88,147 @@ struct ClientFormView: View {
                         .font(AppFonts.headline())
                         .foregroundColor(AppColors.primary)
                     CustomTextField(placeholder: "Dirección (opcional)", text: $viewModel.direccion)
+                }
+                .cardStyle()
+
+                // MARK: Ubicación
+                VStack(alignment: .leading, spacing: 12) {
+                    Label("Ubicación del Cliente", systemImage: "mappin.and.ellipse")
+                        .font(AppFonts.headline())
+                        .foregroundColor(AppColors.primary)
+
+                    if viewModel.isLoadingLocation {
+                        HStack(spacing: 12) {
+                            ProgressView()
+                                .scaleEffect(0.9)
+                            Text("Obteniendo ubicación GPS...")
+                                .font(AppFonts.body())
+                                .foregroundColor(AppColors.textSecondary)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(AppColors.primary.opacity(0.05))
+                        .cornerRadius(12)
+
+                    } else if let lat = viewModel.latitud,
+                              let lon = viewModel.longitud {
+                        VStack(spacing: 8) {
+                            MapSnapshotView(latitude: lat, longitude: lon)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 160)
+                                .cornerRadius(12)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(AppColors.primary.opacity(0.2), lineWidth: 1)
+                                )
+
+                            HStack(alignment: .top, spacing: 8) {
+                                Image(systemName: "mappin.circle.fill")
+                                    .foregroundColor(AppColors.primary)
+                                    .font(.system(size: 16))
+                                VStack(alignment: .leading, spacing: 2) {
+                                    if let dir = viewModel.ubicacionDireccion {
+                                        Text(dir)
+                                            .font(AppFonts.caption())
+                                            .foregroundColor(AppColors.textPrimary)
+                                    }
+                                    Text(String(format: "%.6f, %.6f", lat, lon))
+                                        .font(AppFonts.caption2())
+                                        .foregroundColor(AppColors.textSecondary)
+                                }
+                                Spacer()
+                            }
+
+                            HStack(spacing: 8) {
+                                Button {
+                                    viewModel.captureCurrentLocation()
+                                } label: {
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "arrow.triangle.2.circlepath")
+                                        Text("Actualizar")
+                                    }
+                                    .font(AppFonts.caption())
+                                    .foregroundColor(AppColors.primary)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 8)
+                                    .background(AppColors.primary.opacity(0.08))
+                                    .cornerRadius(8)
+                                }
+
+                                Button {
+                                    viewModel.clearLocation()
+                                } label: {
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "trash")
+                                        Text("Eliminar")
+                                    }
+                                    .font(AppFonts.caption())
+                                    .foregroundColor(AppColors.danger)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 8)
+                                    .background(AppColors.danger.opacity(0.08))
+                                    .cornerRadius(8)
+                                }
+                            }
+                        }
+
+                    } else {
+                        VStack(spacing: 10) {
+                            Button {
+                                viewModel.captureCurrentLocation()
+                            } label: {
+                                HStack(spacing: 10) {
+                                    ZStack {
+                                        Circle()
+                                            .fill(AppColors.primary.opacity(0.12))
+                                            .frame(width: 36, height: 36)
+                                        Image(systemName: "location.fill")
+                                            .foregroundColor(AppColors.primary)
+                                            .font(.system(size: 16))
+                                    }
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Usar mi ubicación actual")
+                                            .font(AppFonts.headline())
+                                            .foregroundColor(AppColors.primary)
+                                        Text("Captura las coordenadas GPS ahora")
+                                            .font(AppFonts.caption2())
+                                            .foregroundColor(AppColors.textSecondary)
+                                    }
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(.caption)
+                                        .foregroundColor(AppColors.textTertiary)
+                                }
+                                .padding(12)
+                                .background(AppColors.primary.opacity(0.06))
+                                .cornerRadius(12)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(AppColors.primary.opacity(0.15), lineWidth: 1)
+                                )
+                            }
+                            .buttonStyle(.plain)
+
+                            Text("La ubicación es opcional. Puedes completar la dirección manualmente en el campo anterior.")
+                                .font(AppFonts.caption2())
+                                .foregroundColor(AppColors.textTertiary)
+                                .multilineTextAlignment(.center)
+                        }
+                    }
+
+                    if let error = viewModel.locationError {
+                        HStack(spacing: 6) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(AppColors.warning)
+                                .font(.caption)
+                            Text(error)
+                                .font(AppFonts.caption())
+                                .foregroundColor(AppColors.warning)
+                        }
+                        .padding(10)
+                        .background(AppColors.warning.opacity(0.08))
+                        .cornerRadius(8)
+                    }
                 }
                 .cardStyle()
 

@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import CoreLocation
 
 final class ClientFormViewModel: ObservableObject {
 
@@ -15,6 +16,13 @@ final class ClientFormViewModel: ObservableObject {
     @Published var errorMessage: String? = nil
     @Published var isFormValid: Bool = false
 
+    // Location
+    @Published var latitud: Double? = nil
+    @Published var longitud: Double? = nil
+    @Published var ubicacionDireccion: String? = nil
+    @Published var isLoadingLocation: Bool = false
+    @Published var locationError: String? = nil
+
     // MARK: - Properties
 
     var isEditing: Bool { client != nil }
@@ -24,12 +32,16 @@ final class ClientFormViewModel: ObservableObject {
 
     private var client: Cliente?
     private let clientService: ClientServiceProtocol
+    private let locationService: LocationServiceProtocol
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Init
 
-    init(service: ClientServiceProtocol, client: Cliente? = nil) {
+    init(service: ClientServiceProtocol,
+         locationService: LocationServiceProtocol,
+         client: Cliente? = nil) {
         self.clientService = service
+        self.locationService = locationService
         self.client = client
 
         if let client {
@@ -40,6 +52,9 @@ final class ClientFormViewModel: ObservableObject {
             correo    = client.correo    ?? ""
             direccion = client.direccion ?? ""
             estado    = client.estado
+            latitud             = client.latitud
+            longitud            = client.longitud
+            ubicacionDireccion  = client.ubicacionDireccion
         }
 
         $dni.combineLatest($nombres, $apellidos)
@@ -49,6 +64,37 @@ final class ClientFormViewModel: ObservableObject {
                 && apellidos.count >= 2
             }
             .assign(to: &$isFormValid)
+    }
+
+    // MARK: - Location Actions
+
+    func captureCurrentLocation() {
+        isLoadingLocation = true
+        locationError = nil
+        locationService.requestPermission()
+        locationService.getCurrentLocation { [weak self] result in
+            DispatchQueue.main.async {
+                self?.isLoadingLocation = false
+                switch result {
+                case .success(let ubicacion):
+                    self?.latitud            = ubicacion.latitud
+                    self?.longitud           = ubicacion.longitud
+                    self?.ubicacionDireccion = ubicacion.direccion
+                    if let dir = ubicacion.direccion,
+                       self?.direccion.isEmpty == true {
+                        self?.direccion = dir
+                    }
+                case .failure:
+                    self?.locationError = "No se pudo obtener la ubicación. Verifica los permisos de GPS."
+                }
+            }
+        }
+    }
+
+    func clearLocation() {
+        latitud            = nil
+        longitud           = nil
+        ubicacionDireccion = nil
     }
 
     // MARK: - Actions
@@ -82,14 +128,17 @@ final class ClientFormViewModel: ObservableObject {
         errorMessage = nil
 
         let entity = Cliente(
-            id:        client?.id ?? UUID(),
-            dni:       dni,
-            nombres:   nombres,
-            apellidos: apellidos,
-            telefono:  telefono.isEmpty  ? nil : telefono,
-            correo:    correo.isEmpty    ? nil : correo,
-            direccion: direccion.isEmpty ? nil : direccion,
-            estado:    estado
+            id:                  client?.id ?? UUID(),
+            dni:                 dni,
+            nombres:             nombres,
+            apellidos:           apellidos,
+            telefono:            telefono.isEmpty  ? nil : telefono,
+            correo:              correo.isEmpty    ? nil : correo,
+            direccion:           direccion.isEmpty ? nil : direccion,
+            estado:              estado,
+            latitud:             latitud,
+            longitud:            longitud,
+            ubicacionDireccion:  ubicacionDireccion
         )
 
         let result = isEditing ? clientService.update(entity) : clientService.create(entity)

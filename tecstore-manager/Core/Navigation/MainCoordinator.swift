@@ -124,6 +124,7 @@ final class MainCoordinator: Coordinator {
     private func showClientForm(client: Cliente?) {
         let viewModel = ClientFormViewModel(
             service: container.clientService,
+            locationService: container.locationService,
             client: client
         )
         let formView = ClientFormView(

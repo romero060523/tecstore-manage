@@ -24,14 +24,17 @@
     </entity>
 
     <entity name="ClienteEntity" representedClassName="ClienteEntity" syncable="YES" codeGenerationType="class">
-        <attribute name="id"        attributeType="UUID"    usesScalarValueType="NO"/>
-        <attribute name="dni"       attributeType="String"/>
-        <attribute name="nombres"   attributeType="String"/>
-        <attribute name="apellidos" attributeType="String"/>
-        <attribute name="telefono"  optional="YES" attributeType="String"/>
-        <attribute name="correo"    optional="YES" attributeType="String"/>
-        <attribute name="direccion" optional="YES" attributeType="String"/>
-        <attribute name="estado"    attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+        <attribute name="id"                  attributeType="UUID"    usesScalarValueType="NO"/>
+        <attribute name="dni"                 attributeType="String"/>
+        <attribute name="nombres"             attributeType="String"/>
+        <attribute name="apellidos"           attributeType="String"/>
+        <attribute name="telefono"            optional="YES" attributeType="String"/>
+        <attribute name="correo"              optional="YES" attributeType="String"/>
+        <attribute name="direccion"           optional="YES" attributeType="String"/>
+        <attribute name="estado"              attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+        <attribute name="latitud"             optional="YES" attributeType="Double"  defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="longitud"            optional="YES" attributeType="Double"  defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="ubicacionDireccion"  optional="YES" attributeType="String"/>
         <relationship name="ventas" optional="YES" toMany="YES" deletionRule="Cascade"
                       destinationEntity="VentaEntity" inverseName="cliente" inverseEntity="VentaEntity"/>
     </entity>

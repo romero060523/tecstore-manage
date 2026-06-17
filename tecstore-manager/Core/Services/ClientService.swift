@@ -28,7 +28,10 @@ final class ClientService: ClientServiceProtocol {
                 apellidos: client.apellidos,
                 telefono: client.telefono,
                 correo: client.correo,
-                direccion: client.direccion
+                direccion: client.direccion,
+                latitud: client.latitud ?? 0.0,
+                longitud: client.longitud ?? 0.0,
+                ubicacionDireccion: client.ubicacionDireccion
             )
             return .success(client)
         } catch {
@@ -47,7 +50,10 @@ final class ClientService: ClientServiceProtocol {
                 telefono: client.telefono,
                 correo: client.correo,
                 direccion: client.direccion,
-                estado: client.estado
+                estado: client.estado,
+                latitud: client.latitud ?? 0.0,
+                longitud: client.longitud ?? 0.0,
+                ubicacionDireccion: client.ubicacionDireccion
             )
             return .success(client)
         } catch let serviceError as ServiceError {

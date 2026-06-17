@@ -42,7 +42,9 @@ final class ClientRepository {
     // MARK: - Writes
 
     func create(dni: String, nombres: String, apellidos: String,
-                telefono: String?, correo: String?, direccion: String?) throws {
+                telefono: String?, correo: String?, direccion: String?,
+                latitud: Double = 0.0, longitud: Double = 0.0,
+                ubicacionDireccion: String? = nil) throws {
         var saveError: Error?
         let context = stack.newBackgroundContext()
         context.performAndWait {
@@ -55,13 +57,18 @@ final class ClientRepository {
             entity.correo = correo
             entity.direccion = direccion
             entity.estado = true
+            entity.latitud = latitud
+            entity.longitud = longitud
+            entity.ubicacionDireccion = ubicacionDireccion
             do { try context.save() } catch { saveError = error }
         }
         if let error = saveError { throw error }
     }
 
     func update(id: UUID, dni: String, nombres: String, apellidos: String,
-                telefono: String?, correo: String?, direccion: String?, estado: Bool) throws {
+                telefono: String?, correo: String?, direccion: String?, estado: Bool,
+                latitud: Double = 0.0, longitud: Double = 0.0,
+                ubicacionDireccion: String? = nil) throws {
         var saveError: Error?
         let context = stack.newBackgroundContext()
         context.performAndWait {
@@ -78,6 +85,9 @@ final class ClientRepository {
             entity.correo = correo
             entity.direccion = direccion
             entity.estado = estado
+            entity.latitud = latitud
+            entity.longitud = longitud
+            entity.ubicacionDireccion = ubicacionDireccion
             do { try context.save() } catch { saveError = error }
         }
         if let error = saveError { throw error }

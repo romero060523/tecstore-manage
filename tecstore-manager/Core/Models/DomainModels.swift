@@ -29,13 +29,21 @@ struct Producto: Identifiable, Hashable {
 
 struct Cliente: Identifiable, Hashable {
     let id: UUID
-    let dni: String
-    let nombres: String
-    let apellidos: String
-    let telefono: String?
-    let correo: String?
-    let direccion: String?
-    let estado: Bool
+    var dni: String
+    var nombres: String
+    var apellidos: String
+    var telefono: String?
+    var correo: String?
+    var direccion: String?
+    var estado: Bool
+    var latitud: Double? = nil
+    var longitud: Double? = nil
+    var ubicacionDireccion: String? = nil
+
+    var tieneUbicacion: Bool {
+        guard let lat = latitud, let lon = longitud else { return false }
+        return lat != 0.0 && lon != 0.0
+    }
 }
 
 // MARK: - Venta

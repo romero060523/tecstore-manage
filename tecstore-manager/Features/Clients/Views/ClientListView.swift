@@ -119,14 +119,26 @@ struct ClientRowView: View {
 
             Spacer()
 
-            Text(client.estado ? "Activo" : "Inactivo")
-                .font(AppFonts.caption2())
-                .padding(.horizontal, 8).padding(.vertical, 3)
-                .background(client.estado
-                             ? AppColors.success.opacity(0.12)
-                             : AppColors.danger.opacity(0.12))
-                .foregroundColor(client.estado ? AppColors.success : AppColors.danger)
-                .cornerRadius(8)
+            VStack(alignment: .trailing, spacing: 4) {
+                Text(client.estado ? "Activo" : "Inactivo")
+                    .font(AppFonts.caption2())
+                    .padding(.horizontal, 8).padding(.vertical, 3)
+                    .background(client.estado
+                                 ? AppColors.success.opacity(0.12)
+                                 : AppColors.danger.opacity(0.12))
+                    .foregroundColor(client.estado ? AppColors.success : AppColors.danger)
+                    .cornerRadius(8)
+
+                if client.tieneUbicacion {
+                    HStack(spacing: 3) {
+                        Image(systemName: "mappin.circle.fill")
+                            .font(.system(size: 10))
+                        Text("GPS")
+                            .font(AppFonts.caption2())
+                    }
+                    .foregroundColor(AppColors.primary)
+                }
+            }
         }
         .padding(.vertical, 4)
     }
