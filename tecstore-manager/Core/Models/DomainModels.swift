@@ -15,13 +15,14 @@ struct Usuario: Identifiable, Hashable {
 
 struct Producto: Identifiable, Hashable {
     let id: UUID
-    let codigo: String
-    let nombre: String
-    let categoria: String
-    let precio: Double
-    let stock: Int32
-    let fechaRegistro: Date
-    let estado: Bool
+    var codigo: String
+    var nombre: String
+    var categoria: String
+    var precio: Double
+    var stock: Int32
+    var fechaRegistro: Date
+    var estado: Bool
+    var imagenData: Data? = nil
 }
 
 // MARK: - Cliente

@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 
 struct ProductFormView: View {
     @ObservedObject var viewModel: ProductFormViewModel
@@ -8,6 +9,89 @@ struct ProductFormView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
+
+                // MARK: Imagen del Producto
+                VStack(alignment: .leading, spacing: 12) {
+                    Label("Imagen del Producto", systemImage: "photo.fill")
+                        .font(AppFonts.headline())
+                        .foregroundColor(AppColors.primary)
+
+                    if let data = viewModel.imagenData,
+                       let uiImage = UIImage(data: data) {
+
+                        ZStack(alignment: .topTrailing) {
+                            Image(uiImage: uiImage)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 200)
+                                .clipped()
+                                .cornerRadius(12)
+
+                            Button {
+                                viewModel.removeImage()
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.system(size: 24))
+                                    .foregroundColor(.white)
+                                    .shadow(radius: 2)
+                            }
+                            .padding(8)
+                        }
+
+                        PhotosPicker(
+                            selection: $viewModel.selectedPhotoItem,
+                            matching: .images,
+                            photoLibrary: .shared()
+                        ) {
+                            HStack {
+                                Image(systemName: "arrow.triangle.2.circlepath")
+                                Text("Cambiar imagen")
+                            }
+                            .font(AppFonts.caption())
+                            .foregroundColor(AppColors.primary)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(AppColors.primary.opacity(0.08))
+                            .cornerRadius(8)
+                        }
+
+                    } else {
+                        PhotosPicker(
+                            selection: $viewModel.selectedPhotoItem,
+                            matching: .images,
+                            photoLibrary: .shared()
+                        ) {
+                            VStack(spacing: 12) {
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(AppColors.primary.opacity(0.06))
+                                        .frame(maxWidth: .infinity)
+                                        .frame(height: 160)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .stroke(AppColors.primary.opacity(0.2),
+                                                        style: StrokeStyle(lineWidth: 1.5,
+                                                                           dash: [6]))
+                                        )
+                                    VStack(spacing: 8) {
+                                        Image(systemName: "camera.fill")
+                                            .font(.system(size: 32))
+                                            .foregroundColor(AppColors.primary.opacity(0.5))
+                                        Text("Toca para agregar imagen")
+                                            .font(AppFonts.caption())
+                                            .foregroundColor(AppColors.textSecondary)
+                                        Text("Desde galería o cámara")
+                                            .font(AppFonts.caption2())
+                                            .foregroundColor(AppColors.textTertiary)
+                                    }
+                                }
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .cardStyle()
 
                 // MARK: Información básica
                 VStack(alignment: .leading, spacing: 16) {

@@ -27,7 +27,8 @@ final class ProductService: ProductServiceProtocol {
                 nombre: product.nombre,
                 categoria: product.categoria,
                 precio: product.precio,
-                stock: product.stock
+                stock: product.stock,
+                imagenData: product.imagenData
             )
             return .success(product)
         } catch {
@@ -45,7 +46,8 @@ final class ProductService: ProductServiceProtocol {
                 categoria: product.categoria,
                 precio: product.precio,
                 stock: product.stock,
-                estado: product.estado
+                estado: product.estado,
+                imagenData: product.imagenData
             )
             return .success(product)
         } catch let serviceError as ServiceError {

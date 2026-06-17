@@ -116,14 +116,24 @@ private struct ProductRow: View {
     var body: some View {
         HStack(spacing: 12) {
 
-            // Category icon
             ZStack {
                 RoundedRectangle(cornerRadius: 12)
                     .fill(categoryColor(product.categoria).opacity(0.12))
-                    .frame(width: 48, height: 48)
-                Image(systemName: categoryIcon(product.categoria))
-                    .foregroundColor(categoryColor(product.categoria))
-                    .font(.system(size: 20, weight: .medium))
+                    .frame(width: 52, height: 52)
+
+                if let data = product.imagenData,
+                   let uiImage = UIImage(data: data) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 52, height: 52)
+                        .clipped()
+                        .cornerRadius(12)
+                } else {
+                    Image(systemName: categoryIcon(product.categoria))
+                        .foregroundColor(categoryColor(product.categoria))
+                        .font(.system(size: 22))
+                }
             }
 
             VStack(alignment: .leading, spacing: 4) {

@@ -1,4 +1,5 @@
-import Foundation
+import SwiftUI
+import PhotosUI
 import Combine
 
 final class ProductFormViewModel: ObservableObject {
@@ -13,6 +14,8 @@ final class ProductFormViewModel: ObservableObject {
     @Published var estado: Bool = true
     @Published var errorMessage: String? = nil
     @Published var isFormValid: Bool = false
+    @Published var imagenData: Data? = nil
+    @Published var selectedPhotoItem: PhotosPickerItem? = nil
 
     // MARK: - Properties
 
@@ -39,6 +42,7 @@ final class ProductFormViewModel: ObservableObject {
             precio    = String(product.precio)
             stock     = String(product.stock)
             estado    = product.estado
+            imagenData = product.imagenData
         }
 
         $nombre.combineLatest($precio, $stock)
@@ -48,6 +52,34 @@ final class ProductFormViewModel: ObservableObject {
                 (Int(stock) ?? -1) >= 0
             }
             .assign(to: &$isFormValid)
+
+        $selectedPhotoItem
+            .compactMap { $0 }
+            .sink { [weak self] _ in
+                self?.loadSelectedImage()
+            }
+            .store(in: &cancellables)
+    }
+
+    // MARK: - Image Actions
+
+    func loadSelectedImage() {
+        guard let item = selectedPhotoItem else { return }
+        Task { @MainActor in
+            if let data = try? await item.loadTransferable(type: Data.self) {
+                if let uiImage = UIImage(data: data),
+                   let compressed = uiImage.jpegData(compressionQuality: 0.6) {
+                    self.imagenData = compressed
+                } else {
+                    self.imagenData = data
+                }
+            }
+        }
+    }
+
+    func removeImage() {
+        imagenData = nil
+        selectedPhotoItem = nil
     }
 
     // MARK: - Actions
@@ -77,7 +109,8 @@ final class ProductFormViewModel: ObservableObject {
                 precio:        precioVal,
                 stock:         stockVal,
                 fechaRegistro: product.fechaRegistro,
-                estado:        estado
+                estado:        estado,
+                imagenData:    imagenData
             )
             switch productService.update(updated) {
             case .success:  onSave?()
@@ -93,7 +126,8 @@ final class ProductFormViewModel: ObservableObject {
                 precio:        precioVal,
                 stock:         stockVal,
                 fechaRegistro: Date(),
-                estado:        estado
+                estado:        estado,
+                imagenData:    imagenData
             )
             switch productService.create(nuevo) {
             case .success:  onSave?()

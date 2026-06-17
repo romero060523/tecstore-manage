@@ -11,7 +11,7 @@ struct DashboardView: View {
 
                 // MARK: Header gradient (card, no ignoresSafeArea)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Bienvenido 👋")
+                    Text("Bienvenido")
                         .font(AppFonts.caption())
                         .foregroundColor(.white.opacity(0.8))
                     Text("TecStore Manager")

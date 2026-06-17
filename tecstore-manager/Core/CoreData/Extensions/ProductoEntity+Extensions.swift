@@ -13,7 +13,8 @@ extension ProductoEntity {
         precio: Double,
         stock: Int32,
         fechaRegistro: Date = Date(),
-        estado: Bool = true
+        estado: Bool = true,
+        imagenData: Data? = nil
     ) {
         self.init(context: context)
         self.id            = UUID()
@@ -24,6 +25,7 @@ extension ProductoEntity {
         self.stock         = stock
         self.fechaRegistro = fechaRegistro
         self.estado        = estado
+        self.imagenData    = imagenData
     }
 
     // MARK: - Domain Mapping
@@ -37,7 +39,8 @@ extension ProductoEntity {
             precio:        self.precio,
             stock:         self.stock,
             fechaRegistro: self.fechaRegistro ?? Date(),
-            estado:        self.estado
+            estado:        self.estado,
+            imagenData:    self.imagenData
         )
     }
 }

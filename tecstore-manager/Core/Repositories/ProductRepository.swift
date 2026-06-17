@@ -49,7 +49,7 @@ final class ProductRepository {
     // MARK: - Writes
 
     func create(codigo: String, nombre: String, categoria: String,
-                precio: Double, stock: Int32) throws {
+                precio: Double, stock: Int32, imagenData: Data? = nil) throws {
         var saveError: Error?
         let context = stack.newBackgroundContext()
         context.performAndWait {
@@ -62,13 +62,14 @@ final class ProductRepository {
             entity.stock = stock
             entity.fechaRegistro = Date()
             entity.estado = true
+            entity.imagenData = imagenData
             do { try context.save() } catch { saveError = error }
         }
         if let error = saveError { throw error }
     }
 
     func update(id: UUID, codigo: String, nombre: String, categoria: String,
-                precio: Double, stock: Int32, estado: Bool) throws {
+                precio: Double, stock: Int32, estado: Bool, imagenData: Data? = nil) throws {
         var saveError: Error?
         let context = stack.newBackgroundContext()
         context.performAndWait {
@@ -84,6 +85,7 @@ final class ProductRepository {
             entity.precio = precio
             entity.stock = stock
             entity.estado = estado
+            entity.imagenData = imagenData
             do { try context.save() } catch { saveError = error }
         }
         if let error = saveError { throw error }
